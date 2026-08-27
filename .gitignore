@@ -1,0 +1,43 @@
+# Stable archives and user source materials
+backups/
+source_materials/
+
+# Local runtime and generated output
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+output/
+
+# Secrets and local settings
+.env
+.env.*
+
+# Editor and OS files
+.vscode/
+.idea/
+*.code-workspace
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+*.log
+
+# Potentially private / real data exports
+*.csv
+*.xls
+*.xlsx
+*.xlsm
+*.parquet
+*.key
+*.zip
+
+# Data directory: commit only approved synthetic/demo workbooks
+data/*
+!data/demo_topgun.xlsx
+!data/demo_topgun_v02.xlsx

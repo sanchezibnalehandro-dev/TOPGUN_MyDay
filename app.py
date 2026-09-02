@@ -1,8 +1,7 @@
 from __future__ import annotations
 
 import argparse
-from pathlib import Path
-
+from topgun_myday.resources import resource_path
 from topgun_myday.ui import MyDayApp
 
 
@@ -18,7 +17,7 @@ def main() -> None:
     app = MyDayApp()
     if args.smoke_ui:
         app.withdraw()
-        app.load_path(Path(__file__).parent / "data" / "demo_topgun.xlsx")
+        app.load_path(resource_path("data", "demo_topgun.xlsx"))
         app.update_idletasks()
         app.destroy()
         return

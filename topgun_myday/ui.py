@@ -23,6 +23,7 @@ from .report import (
     safe_report_filename_v02,
     unavailable_text,
 )
+from .resources import default_export_directory, resource_path
 from .rules import (
     RuleEngineResult,
     RulesConfigError,
@@ -31,9 +32,7 @@ from .rules import (
 )
 
 
-RULES_CONFIG_PATH = (
-    Path(__file__).resolve().parent.parent / "config" / "business_rules.json"
-)
+RULES_CONFIG_PATH = resource_path("config", "business_rules.json")
 _KPI_IDS = tuple(V02_KPI_LABELS)
 
 
@@ -512,8 +511,7 @@ class MyDayApp(tk.Tk):
     def _save_report(self) -> None:
         if self.analysis is None or self.rule_result is None:
             return
-        output_dir = Path(__file__).resolve().parent.parent / "output"
-        output_dir.mkdir(parents=True, exist_ok=True)
+        output_dir = default_export_directory()
         path = filedialog.asksaveasfilename(title="Сохранить отчёт", initialdir=output_dir, initialfile=safe_report_filename_v02(self.analysis), defaultextension=".html", filetypes=(("Печатный HTML", "*.html"),))
         if not path:
             return

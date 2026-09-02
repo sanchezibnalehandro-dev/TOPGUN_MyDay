@@ -4,6 +4,9 @@ source_materials/
 
 # Local runtime and generated output
 .venv/
+.build-venv-macos/
+.build-macos/
+dist-macos/
 __pycache__/
 *.py[cod]
 .pytest_cache/

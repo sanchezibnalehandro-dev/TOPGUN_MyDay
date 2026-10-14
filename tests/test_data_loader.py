@@ -98,6 +98,44 @@ class DataLoaderTests(unittest.TestCase):
         self.assertIsInstance(dataset.frame["visit_id"].iloc[0], str)
         self.assertIsInstance(dataset.frame["client_id"].iloc[0], str)
 
+    def test_duplicate_synthetic_visit_ids_are_rejected_in_csv(self) -> None:
+        with tempfile.TemporaryDirectory() as folder:
+            frame = synthetic_rows()
+            # Different barbers are no exception to the global visit_id contract.
+            frame.loc[1, "visit_id"] = " 00123 "
+            path = Path(folder) / "duplicates.csv"
+            frame.to_csv(path, index=False)
+            with self.assertRaisesRegex(
+                InputDataError, r"visit_id.*повторяющиеся.*строках.*2, 3"
+            ):
+                load_file(path)
+
+    def test_duplicate_synthetic_visit_ids_are_rejected_in_xlsx(self) -> None:
+        with tempfile.TemporaryDirectory() as folder:
+            frame = synthetic_rows()
+            frame.loc[1, "visit_id"] = "00123"
+            path = Path(folder) / "duplicates.xlsx"
+            frame.to_excel(path, sheet_name="Визиты_SYNTHETIC", index=False)
+            with self.assertRaisesRegex(InputDataError, "повторяющиеся"):
+                load_file(path)
+
+    def test_repeated_synthetic_client_ids_are_allowed(self) -> None:
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "repeat-client.csv"
+            synthetic_rows().to_csv(path, index=False)
+            loaded = load_file(path)
+        self.assertEqual(loaded.row_count, 2)
+        self.assertEqual(loaded.frame["client_id"].nunique(), 1)
+
+    def test_blank_synthetic_visit_id_is_left_for_metric_data_gap(self) -> None:
+        with tempfile.TemporaryDirectory() as folder:
+            frame = synthetic_rows()
+            frame.loc[1, "visit_id"] = ""
+            path = Path(folder) / "blank-visit.csv"
+            frame.to_csv(path, index=False)
+            loaded = load_file(path)
+        self.assertEqual(loaded.frame["visit_id"].iloc[1], "")
+
     def test_unknown_and_blank_synthetic_flags_are_preserved(self) -> None:
         with tempfile.TemporaryDirectory() as folder:
             frame = synthetic_rows()

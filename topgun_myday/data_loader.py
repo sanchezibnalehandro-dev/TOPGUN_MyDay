@@ -339,6 +339,22 @@ def _validate_and_normalise_synthetic(frame: pd.DataFrame) -> pd.DataFrame:
     _normalise_dates(frame)
     for field in ("barber", "visit_id", "client_id", "branch"):
         frame[field] = _normalise_text_preserving_missing(frame[field])
+
+    # SYNTHETIC_V02 contract: one row is exactly one visit, and visit_id
+    # uniquely identifies it. Duplicate rows otherwise double-count revenue
+    # while visits_count uses nunique(), inflating average_check silently.
+    # Missing IDs are still handled as DATA_GAP in the metrics layer.
+    present_ids = _non_empty_mask(frame["visit_id"])
+    visit_ids = frame["visit_id"].astype("string").str.strip()
+    duplicates = present_ids & visit_ids.duplicated(keep=False)
+    if duplicates.any():
+        raise InputDataError(
+            "Поле `visit_id` содержит повторяющиеся идентификаторы визитов "
+            f"в {int(duplicates.sum())} строках "
+            f"(например: {_row_examples(duplicates)}). "
+            "В SYNTHETIC_V02 одна строка должна соответствовать одному визиту. "
+            "Проверьте дубли перед расчётом среднего чека."
+        )
     for field in ("service_revenue", "product_revenue"):
         frame[field] = _normalise_numeric_preserving_invalid(frame[field])
     for field in ("has_extra_service", "prebooked"):
